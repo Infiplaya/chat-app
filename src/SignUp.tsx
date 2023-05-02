@@ -49,7 +49,7 @@ export default function SignUp() {
   return (
     <form
       onSubmit={handleSubmit(handleSignUp)}
-      className="py-24 bg-gray-800 border-2 border-gray-700 rounded-md"
+      className="py-24 bg-gray-800 border-2 border-gray-700 shadow-lg shadow-gray-800 rounded-md"
     >
       <div className="mx-auto space-y-6 w-2/3">
         <h3 className="text-2xl font-medium text-gray-50">Sign Up</h3>

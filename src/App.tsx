@@ -72,9 +72,23 @@ export default function App() {
         </>
       ) : (
         <div>
-          <div className="mt-10 flex gap-10 text-white">
-            <button onClick={() => setAuthState("signIn")}>Sign In</button>
-            <button onClick={() => setAuthState("signUp")}>Sign Up</button>
+          <div className="my-5 px-6 flex space-x-5 text-white">
+            <button
+              onClick={() => setAuthState("signIn")}
+              className={`w-full py-2 rounded-md ${
+                authState === "signIn" ? "bg-violet-500" : "bg-gray-700"
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => setAuthState("signUp")}
+              className={`w-full py-2 rounded-md ${
+                authState === "signUp" ? "bg-violet-500" : "bg-gray-700"
+              }`}
+            >
+              Sign Up
+            </button>
           </div>
 
           {authState === "signIn" ? <SignIn /> : <SignUp />}
