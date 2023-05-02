@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Chat } from "./Chat";
 import { supabase } from "./supabase";
-import { z } from "zod";
 import type { Session } from "@supabase/supabase-js";
 import SignUp from "./SignUp";
 import { SignIn } from "./SignIn";
@@ -58,7 +57,7 @@ export default function App() {
             <p className="text-gray-100 text-lg">Welcome Back {username}!</p>
             <button
               onClick={() => supabase.auth.signOut()}
-              className=" bg-violet-500 transition-all hover:bg-violet-600 text-gray-100 px-4 py-1 rounded-md"
+              className=" bg-violet-500 font-medium transition-all hover:bg-violet-600 text-gray-100 px-4 py-1 rounded-md"
             >
               Logout
             </button>

@@ -1,5 +1,6 @@
 import { Session } from "@supabase/supabase-js";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { z } from "zod";
 import { supabase } from "./supabase";
 
 interface ChatMessage {
@@ -7,6 +8,14 @@ interface ChatMessage {
   username: string;
   message: string;
 }
+
+const messagesSchema = z.array(
+  z.object({
+    id: z.number(),
+    username: z.string(),
+    message: z.string(),
+  })
+);
 
 export function Chat({
   username,
@@ -46,11 +55,11 @@ export function Chat({
       supabase.removeChannel(channel);
     };
   }, []);
-  
 
   async function getMessages() {
     const { data } = await supabase.from("messages").select();
-    setMessages(data);
+    const safeData = messagesSchema.parse(data);
+    setMessages(safeData);
   }
 
   useEffect(() => {
@@ -67,7 +76,7 @@ export function Chat({
   }
   return (
     <div>
-      <ul className="max-h-96 p-3 overflow-y-auto text-gray-200 bg-gray-800 border-2 border-gray-700">
+      <ul className="max-h-96 px-3 py-6 rounded-md overflow-y-auto text-gray-200 bg-gray-800 border-2 border-gray-700">
         {messages.map((msg) => (
           <li key={msg.id}>
             <span className="font-semibold text-violet-400">
@@ -90,7 +99,7 @@ export function Chat({
         />
         <button
           type="submit"
-          className=" bg-violet-500 self-end mt-2 transition-all hover:bg-violet-600 text-gray-100 px-4 py-1 rounded-md"
+          className=" bg-violet-500 self-end mt-2 font-medium transition-all hover:bg-violet-600 text-gray-100 px-4 py-1 rounded-md"
         >
           Send message
         </button>
