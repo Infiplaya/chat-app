@@ -1,6 +1,6 @@
 # Lets Chat!
 
-[https://letschathing.netlify.app/]
+[lets chat thing](https://letschathing.netlify.app/)
 
 ## Introduction
 
