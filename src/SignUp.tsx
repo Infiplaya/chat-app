@@ -1,32 +1,54 @@
 import { FormEvent, useState } from "react";
 import { supabase } from "./supabase";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const registerSchema = z
+  .object({
+    email: z.string().email(),
+    username: z
+      .string()
+      .min(3, { message: "Username must contain at least 3 characters" }),
+    password: z
+      .string()
+      .min(6, { message: "Password must contain at least 6 characters" }),
+  })
+  .required();
+
+type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function SignUp() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema),
+  });
+
   const [loading, setLoading] = useState(false);
-  async function handleSignUp(e: FormEvent) {
-    e.preventDefault();
+  async function handleSignUp(data: RegisterForm) {
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
+    await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
     });
 
-    const { data } = await supabase.auth.getUser();
+    const { data: supabaseData } = await supabase.auth.getUser();
 
     await supabase.from("profiles").insert({
-      id: data.user?.id,
-      username: name,
+      id: supabaseData.user?.id,
+      username: data.username,
     });
 
     setLoading(false);
   }
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+
   return (
     <form
-      onSubmit={handleSignUp}
+      onSubmit={handleSubmit(handleSignUp)}
       className="py-24 bg-gray-800 border-2 border-gray-700 rounded-md"
     >
       <div className="mx-auto space-y-6 w-2/3">
@@ -40,13 +62,14 @@ export default function SignUp() {
           </label>
           <div className="mt-2">
             <input
-              type="text"
-              id="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="block bg-gray-800 outline-none w-full pl-3 rounded-md border-0 py-1.5 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-600 sm:text-sm sm:leading-6"
+              {...register("email")}
+              aria-invalid={errors.email ? "true" : "false"}
+              className="block bg-gray-800 invalid:border-pink-500 invalid:text-pink-600
+              focus:invalid:border-pink-500 focus:invalid:ring-pink-500 outline-none w-full pl-3 rounded-md border-0 py-1.5 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-600 sm:text-sm sm:leading-6"
             />
+            <p className="text-red-400 font-medium text-sm mt-2">
+              {errors.email?.message}
+            </p>
           </div>
         </div>
 
@@ -59,13 +82,13 @@ export default function SignUp() {
           </label>
           <div className="mt-2">
             <input
-              type="text"
-              id="name"
-              name="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="block bg-gray-800 outline-none w-full pl-3 rounded-md border-0 py-1.5 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-600 sm:text-sm sm:leading-6"
+              {...register("username")}
+              aria-invalid={errors.username ? "true" : "false"}
+              className="block bg-gray-800  outline-none w-full pl-3 rounded-md border-0 py-1.5 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-600 sm:text-sm sm:leading-6"
             />
+            <p className="text-red-400 font-medium text-sm mt-2">
+              {errors.username?.message}
+            </p>
           </div>
         </div>
 
@@ -80,12 +103,13 @@ export default function SignUp() {
             <input
               type="password"
               autoComplete="true"
-              id="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
+              aria-invalid={errors.password ? "true" : "false"}
               className="block bg-gray-800 outline-none w-full pl-3 rounded-md border-0 py-1.5 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-600 sm:text-sm sm:leading-6"
             />
+            <p className="text-red-400 font-medium text-sm mt-2">
+              {errors.password?.message}
+            </p>
           </div>
         </div>
 

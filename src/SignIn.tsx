@@ -1,23 +1,44 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FormEvent, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { supabase } from "./supabase";
 
+const loginSchema = z
+  .object({
+    email: z.string().email(),
+    password: z
+      .string()
+      .min(6, { message: "Password must contain at least 6 characters" }),
+  })
+  .required();
+
+type LoginForm = z.infer<typeof loginSchema>;
+
 export function SignIn() {
-  async function handleSignIn(e: FormEvent) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const [credentialsError, setCredentialsError] = useState("");
+
+  async function handleSignIn(data: LoginForm) {
     const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
+      email: data.email,
+      password: data.password,
     });
 
     if (error) {
-      alert("Something went wrong");
+      setCredentialsError("Invalid credentials!");
     }
   }
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   return (
     <form
-      onSubmit={handleSignIn}
+      onSubmit={handleSubmit(handleSignIn)}
       className="py-24 bg-gray-800 border-2 border-gray-700 rounded-md"
     >
       <div className="mx-auto space-y-6 w-2/3">
@@ -31,13 +52,12 @@ export function SignIn() {
           </label>
           <div className="mt-2">
             <input
-              type="text"
-              id="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
               className="block bg-gray-800 outline-none w-full pl-3 rounded-md border-0 py-1.5 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-600 sm:text-sm sm:leading-6"
             />
+            <p className="text-red-400 font-medium text-sm mt-2">
+              {errors.email?.message}
+            </p>
           </div>
         </div>
 
@@ -52,12 +72,12 @@ export function SignIn() {
             <input
               type="password"
               autoComplete="true"
-              id="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
               className="block bg-gray-800 outline-none w-full pl-3 rounded-md border-0 py-1.5 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-600 sm:text-sm sm:leading-6"
             />
+            <p className="text-red-400 font-medium text-sm mt-2">
+              {errors.password?.message}
+            </p>
           </div>
         </div>
 
@@ -67,6 +87,7 @@ export function SignIn() {
         >
           Sign In
         </button>
+        <p className="text-red-400 font-medium mt-2">{credentialsError}</p>
       </div>
     </form>
   );

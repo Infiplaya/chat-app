@@ -18,15 +18,12 @@ export default function App() {
       if (session) {
         setLoading(true);
         const { user } = session;
-        console.log("user", user);
 
         const { data, error } = await supabase
           .from("profiles")
           .select(`username, id`)
           .eq("id", user.id)
           .single();
-
-        console.log("userdata", data);
 
         if (error) {
           console.warn(error);
