@@ -68,6 +68,7 @@ export function Chat({
 
   async function handleNewMessage(e: FormEvent) {
     e.preventDefault();
+    if (!message) return;
     await supabase
       .from("messages")
       .insert({ message: message, username: username, user_id: userId });
