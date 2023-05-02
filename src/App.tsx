@@ -9,13 +9,16 @@ export default function App() {
   const [username, setUsername] = useState("");
   const [authState, setAuthState] = useState<"signUp" | "signIn">("signUp");
   const [userId, setUserId] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     async function getUser() {
       if (session) {
+        setLoading(true);
         const { user } = session;
+        console.log("user", user);
 
         const { data, error } = await supabase
           .from("profiles")
@@ -23,12 +26,15 @@ export default function App() {
           .eq("id", user.id)
           .single();
 
+        console.log("userdata", data);
+
         if (error) {
           console.warn(error);
         } else if (data) {
           setUsername(data.username);
           setUserId(data.id);
         }
+        setLoading(false);
       }
     }
 
@@ -56,7 +62,9 @@ export default function App() {
           <div className="flex w-full my-4 justify-between">
             <p className="text-gray-100 text-lg">Welcome Back {username}!</p>
             <button
-              onClick={() => supabase.auth.signOut()}
+              onClick={() => {
+                supabase.auth.signOut();
+              }}
               className=" bg-violet-500 font-medium transition-all hover:bg-violet-600 text-gray-100 px-4 py-1 rounded-md"
             >
               Logout

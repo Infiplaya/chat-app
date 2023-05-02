@@ -2,8 +2,11 @@ import { FormEvent, useState } from "react";
 import { supabase } from "./supabase";
 
 export default function SignUp() {
+  const [loading, setLoading] = useState(false);
   async function handleSignUp(e: FormEvent) {
     e.preventDefault();
+    setLoading(true);
+
     const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
@@ -11,16 +14,12 @@ export default function SignUp() {
 
     const { data } = await supabase.auth.getUser();
 
-    console.log(data);
-
     await supabase.from("profiles").insert({
       id: data.user?.id,
       username: name,
     });
 
-    if (error) {
-      alert("Something went wrong");
-    }
+    setLoading(false);
   }
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
