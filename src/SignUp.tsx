@@ -27,7 +27,7 @@ export default function SignUp() {
     resolver: zodResolver(registerSchema),
   });
 
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   async function handleSignUp(data: RegisterForm) {
     setLoading(true);
 

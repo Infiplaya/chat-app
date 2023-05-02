@@ -6,7 +6,7 @@ import { supabase } from "./supabase";
 export function useProfile() {
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   const session = useSession();
 
