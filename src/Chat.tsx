@@ -1,21 +1,7 @@
 import { Session } from "@supabase/supabase-js";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { z } from "zod";
+import { useMessages } from "./hooks";
 import { supabase } from "./supabase";
-
-interface ChatMessage {
-  id: number;
-  username: string;
-  message: string;
-}
-
-const messagesSchema = z.array(
-  z.object({
-    id: z.number(),
-    username: z.string(),
-    message: z.string(),
-  })
-);
 
 export function Chat({
   username,
@@ -27,40 +13,10 @@ export function Chat({
   session: Session;
 }) {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const messages = useMessages();
 
   const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    getMessages();
-
-    const channel = supabase
-      .channel("realtime chat")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-        },
-        (payload) => {
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            payload.new as ChatMessage,
-          ]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  async function getMessages() {
-    const { data } = await supabase.from("messages").select();
-    const safeData = messagesSchema.parse(data);
-    setMessages(safeData);
-  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

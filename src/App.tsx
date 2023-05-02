@@ -1,56 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Chat } from "./Chat";
 import { supabase } from "./supabase";
-import type { Session } from "@supabase/supabase-js";
 import SignUp from "./SignUp";
 import { SignIn } from "./SignIn";
+import { useProfile, useSession } from "./hooks";
 
 export default function App() {
-  const [username, setUsername] = useState("");
   const [authState, setAuthState] = useState<"signUp" | "signIn">("signUp");
-  const [userId, setUserId] = useState("");
-  const [loading, setLoading] = useState(true);
+  const session = useSession();
 
-  const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => {
-    async function getUser() {
-      if (session) {
-        setLoading(true);
-        const { user } = session;
-
-        const { data, error } = await supabase
-          .from("profiles")
-          .select(`username, id`)
-          .eq("id", user.id)
-          .single();
-
-        if (error) {
-          console.warn(error);
-        } else if (data) {
-          setUsername(data.username);
-          setUserId(data.id);
-        }
-        setLoading(false);
-      }
-    }
-
-    getUser();
-  }, [session]);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { userId, username } = useProfile();
 
   return (
     <div className="mx-auto max-w-2xl py-32">
