@@ -1,29 +1,74 @@
-import { FormEvent, useState } from "react";
+import { Session } from "@supabase/supabase-js";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { supabase } from "./supabase";
+
+interface ChatMessage {
+  id: number;
+  username: string;
+  message: string;
+}
 
 export function Chat({
   username,
-  messages,
-  bottomRef,
+  userId,
+  session,
 }: {
   username: string;
-  messages: any;
-  bottomRef: any;
+  userId: string;
+  session: Session;
 }) {
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    getMessages();
+
+    const channel = supabase
+      .channel("realtime chat")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+        },
+        (payload) => {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            payload.new as ChatMessage,
+          ]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+  
+
+  async function getMessages() {
+    const { data } = await supabase.from("messages").select();
+    setMessages(data);
+  }
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [session, messages]);
 
   async function handleNewMessage(e: FormEvent) {
     e.preventDefault();
     await supabase
       .from("messages")
-      .insert({ message: message, username: username });
+      .insert({ message: message, username: username, user_id: userId });
     setMessage("");
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }
   return (
     <div>
-      <ul className="max-h-96 overflow-y-auto text-gray-200 bg-gray-800 border-2 border-gray-700">
-        {messages.map((msg: any) => (
+      <ul className="max-h-96 p-3 overflow-y-auto text-gray-200 bg-gray-800 border-2 border-gray-700">
+        {messages.map((msg) => (
           <li key={msg.id}>
             <span className="font-semibold text-violet-400">
               {msg.username}:
