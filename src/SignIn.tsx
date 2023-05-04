@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {  useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { supabase } from "./supabase";
@@ -42,6 +42,13 @@ export function SignIn() {
       className="py-24 bg-gray-800 shadow-lg shadow-gray-800 border-2 border-gray-700 rounded-md"
     >
       <div className="mx-auto space-y-6 w-2/3">
+        <div>
+          <h3 className="text-xl text-gray-50 mb-2">Demo credentials:</h3>
+          <p className="text-gray-50">
+            Email: <span>test1@mail.com</span>
+          </p>
+          <p className="text-gray-50">password: test11</p>
+        </div>
         <h3 className="text-2xl font-medium text-gray-50">Sign In</h3>
         <div>
           <label
